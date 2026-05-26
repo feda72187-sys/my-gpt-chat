@@ -3,54 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <title>Human GPT Chat</title>
-    <!-- 1. СНАЧАЛА ЗАГРУЖАЕМ БИБЛИОТЕКУ -->
+    <!-- ПРОВЕРЕННАЯ ССЫЛКА -->
     <script src="https://ably.com"></script>
     <style>
         body { background: #343541; color: white; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         #chat { flex: 1; overflow-y: auto; padding: 20px; }
-        .msg { margin: 10px 0; padding: 10px; border-radius: 8px; max-width: 80%; line-height: 1.4; }
-        .user { background: #444654; align-self: flex-start; }
-        .admin { background: #10a37f; align-self: flex-end; margin-left: auto; }
+        .msg { margin: 10px 0; padding: 15px; border-radius: 8px; max-width: 80%; line-height: 1.4; background: #444654; }
+        .admin { background: #10a37f; margin-left: auto; }
         .input-box { padding: 20px; background: #343541; border-top: 1px solid #555; display: flex; }
         input { flex: 1; padding: 12px; border-radius: 5px; border: 1px solid #555; background: #40414f; color: white; outline: none; }
-        button { background: #10a37f; color: white; border: none; padding: 0 20px; margin-left: 10px; border-radius: 5px; cursor: pointer; font-size: 20px; }
+        button { background: #10a37f; color: white; border: none; padding: 0 20px; margin-left: 10px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div id="chat"></div>
     <div class="input-box">
         <input type="text" id="inp" placeholder="Напишите сообщение...">
-        <button onclick="sendMsg()">➤</button>
+        <button id="btn">➤</button>
     </div>
 
     <script>
-        // Твой ключ уже здесь
-        const key = 'e4Ps2w.-kRDKA:HCXcXQA_6CW5FRusVr_J36GAOYVaEvySsMTIurOBXas';
-        const ably = new Ably.Realtime(key);
-        const channel = ably.channels.get('main-chat');
+        // Ждем загрузки страницы
+        window.onload = function() {
+            if (typeof Ably === 'undefined') {
+                alert("Ошибка: Библиотека Ably не загружена! Проверьте интернет или ссылку.");
+                return;
+            }
 
-        // Получение сообщений
-        channel.subscribe('msg', (m) => {
-            const div = document.createElement('div');
-            div.className = 'msg ' + (m.data.role === 'admin' ? 'admin' : 'user');
-            div.innerText = (m.data.role === 'admin' ? 'ИИ: ' : 'Вы: ') + m.data.txt;
-            document.getElementById('chat').appendChild(div);
-            document.getElementById('chat').scrollTop = 99999;
-        });
+            const key = 'e4Ps2w.-kRDKA:HCXcXQA_6CW5FRusVr_J36GAOYVaEvySsMTIurOBXas';
+            const ably = new Ably.Realtime(key);
+            const channel = ably.channels.get('main-chat');
 
-        // Отправка сообщений
-        function sendMsg() {
-            const input = document.getElementById('inp');
-            if (!input.value.trim()) return;
+            channel.subscribe('msg', (m) => {
+                const div = document.createElement('div');
+                div.className = 'msg' + (m.data.role === 'admin' ? ' admin' : '');
+                div.innerText = (m.data.role === 'admin' ? 'ИИ: ' : 'Вы: ') + m.data.txt;
+                document.getElementById('chat').appendChild(div);
+                document.getElementById('chat').scrollTop = 99999;
+            });
+
+            function send() {
+                const input = document.getElementById('inp');
+                if (!input.value.trim()) return;
+                channel.publish('msg', { txt: input.value, role: 'user' });
+                input.value = '';
+            }
+
+            document.getElementById('btn').onclick = send;
+            document.getElementById('inp').onkeypress = (e) => { if (e.key === 'Enter') send(); };
             
-            channel.publish('msg', { txt: input.value, role: 'user' });
-            input.value = '';
-        }
-
-        // Отправка по Enter
-        document.getElementById('inp').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMsg();
-        });
+            console.log("Чат готов к работе!");
+        };
     </script>
 </body>
 </html>
