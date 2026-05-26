@@ -93,10 +93,10 @@
     </div>
 
     <!-- Загрузка библиотеки Ably -->
-   <script src="https://ably.com"></script>
+  <script src="https://ably.com"></script>
     
     <script>
-        // ЗАМЕНИ ЭТУ СТРОЧКУ НА СВОЙ КЛЮЧ:
+      
         const MY_API_KEY = 'e4Ps2w.-kRDKA:HCXcXQA_6CW5FRusVr_J36GAOYVaEvySsMTIurOBXas';
 
         const ably = new Ably.Realtime(MY_API_KEY);
@@ -110,7 +110,7 @@
             console.log('Успешно подключено к серверу!');
         });
 
-        // Слушаем сообщения (и свои, и чужие)
+       
         channel.subscribe('message', (msg) => {
             const isGPT = msg.data.sender === 'Admin';
             const row = document.createElement('div');
